@@ -1,6 +1,15 @@
-
+#include <unistd.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
+
+
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 
 //2021 ssl simulator用
 #include "./ssl_simulation_robot_control.pb.h"
@@ -9,10 +18,9 @@ using namespace std;
 #define PacketLength 1024
 
 int main(){
-
   int sockfd_Sim; 
-  
   struct sockaddr_in addr_Sim; // Sim address
+  unsigned char buffer[PacketLength];
   
   // grSim用設定
   memset(&addr_Sim, 0, sizeof(addr_Sim));
@@ -49,19 +57,17 @@ int main(){
   velcommand->set_forward(3.0);
   velcommand->set_left(1.0);
   velcommand->set_angular(1.0);
-
   
-  unsigned char buffer[PacketLength];
   packet2.SerializeToArray(buffer, PacketLength);
+  printf("%s",buffer);
+  
   sendto(sockfd_Sim,
            buffer,
            PacketLength,
              0,
            (struct sockaddr *)&addr_Sim,
            sizeof(addr_Sim)); 
-           
-
-
+        
 }
 
 
