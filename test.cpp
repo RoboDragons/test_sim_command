@@ -71,10 +71,10 @@ int main(){
 
   char buffer[packet2.ByteSize()];
   packet2.SerializeToArray(buffer, packet2.ByteSize());
-  //sendto(sockfd_Sim, buffer, strlen(buffer)+1, 0, (struct sockaddr *)&addr_Sim, sizeof(addr_Sim));
-  //sendto(sockfd_Sim, buffer, packet2.ByteSize()+1, 0, (struct sockaddr *)&addr_Sim, sizeof(addr_Sim));
-  sendto(sockfd_Sim, buffer, sizeof(buffer)+1, 0, (struct sockaddr *)&addr_Sim, sizeof(addr_Sim));
-  //send(sockfd_Sim, buffer, strlen(buffer)+1, 0);
+  // sample 1:
+  sendto(sockfd_Sim, buffer, packet2.ByteSize(), 0, (struct sockaddr *)&addr_Sim, sizeof(addr_Sim));
+  // sample 2:
+  //sendto(sockfd_Sim, buffer, sizeof(buffer), 0, (struct sockaddr *)&addr_Sim, sizeof(addr_Sim));
 
   return 0;
 }
