@@ -1,4 +1,8 @@
-
+#include <stdio.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
@@ -13,13 +17,27 @@ int main(){
   int sockfd_Sim; 
   
   struct sockaddr_in addr_Sim; // Sim address
+  struct hostent *ptrh;
+  string host;
+  int port;
   
   // grSim用設定
-  memset(&addr_Sim, 0, sizeof(addr_Sim));
+  memset((char *)&addr_Sim, 0, sizeof(addr_Sim));
   addr_Sim.sin_family = AF_INET;
   // grSimを立ち上げているPCのIP．自分自身なら127.0.0.1でOK,そうでないならそのPCのIP.
-  addr_Sim.sin_addr.s_addr = inet_addr("127.0.0.1");
-  addr_Sim.sin_port = htons(10301);
+  host = "127.0.0.1";
+  //port = 10300;   // controller
+  port = 10301;   // blue
+  //port = 10302;   // yellow
+  //addr_Sim.sin_port = htons(10301);
+  addr_Sim.sin_addr.s_addr = inet_addr(host.c_str());
+  addr_Sim.sin_port = htons((u_short) port);
+  ptrh = gethostbyname(host.c_str());
+  if ( ((char *)ptrh) == NULL ) {
+    fprintf(stderr, "invalid host: %s\n", host.c_str());
+    exit(1);
+  }
+  memcpy(&addr_Sim.sin_addr, ptrh->h_addr, ptrh->h_length);
   
   
   // solketを生成
@@ -31,8 +49,9 @@ int main(){
 
 
   RobotControl packet2;
+  //SSLSIMRobotControl packet2{new SSLSIM::RobotControl};
 
-  RobotCommand *command2 =
+  RobotCommand* command2 =
 	      packet2.add_robot_commands();
 
   // set RobotCommand
@@ -50,18 +69,14 @@ int main(){
   velcommand->set_left(1.0);
   velcommand->set_angular(1.0);
 
-  
-  unsigned char buffer[PacketLength];
-  packet2.SerializeToArray(buffer, PacketLength);
-  sendto(sockfd_Sim,
-           buffer,
-           PacketLength,
-             0,
-           (struct sockaddr *)&addr_Sim,
-           sizeof(addr_Sim)); 
-           
+  char buffer[packet2.ByteSize()];
+  packet2.SerializeToArray(buffer, packet2.ByteSize());
+  //sendto(sockfd_Sim, buffer, strlen(buffer)+1, 0, (struct sockaddr *)&addr_Sim, sizeof(addr_Sim));
+  //sendto(sockfd_Sim, buffer, packet2.ByteSize()+1, 0, (struct sockaddr *)&addr_Sim, sizeof(addr_Sim));
+  sendto(sockfd_Sim, buffer, sizeof(buffer)+1, 0, (struct sockaddr *)&addr_Sim, sizeof(addr_Sim));
+  //send(sockfd_Sim, buffer, strlen(buffer)+1, 0);
 
-
+  return 0;
 }
 
 

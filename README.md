@@ -1,6 +1,6 @@
 Required packages ubuntu
 ```
-sudo apt install g++7
+sudo apt install g++-7
 ```
 
 compile
